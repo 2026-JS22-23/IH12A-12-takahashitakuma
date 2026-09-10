@@ -1,1 +1,1 @@
-# IH12A-12-takahashi-takuma
+# IH12A-12-takahashi takuma
