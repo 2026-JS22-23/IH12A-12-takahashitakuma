@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <title>たまに行くショッピングモール紹介</title>
+    
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <link rel="stylesheet"
+        href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.min.js"></script>
+    
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCAKLjisxFelKwIl1_G6MiEO9-ya7Twr5s&callback=initMap">
+    </script>
+    
+    <style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: 'Arial', sans-serif;
+    }
+    #menu {
+        height: 60px;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        box-sizing: border-box;
+    }
+    #map {
+        height: calc(100% - 60px);
+        width: 100%;
+    }
+    </style>
+</head>
+<body>
+    <div id="menu">
+        <button id="resetButton">全体表示</button>
+    </div>
+
+    <div id="map"></div>
+
+    <script>
+    let map;
+    let markers = [];
+
+    const locations = [
+        {
+            title: "HAL名古屋",
+            lat: 35.168120219014064,
+            lng: 136.88551407783842,
+            image: "images/hal.jpg",
+            website: "https://www.hal.ac.jp/nagoya/",
+            description: "HAL名古屋は、名古屋駅から徒歩圏内にあるIT・デジタル・クリエイティブ分野を専門的に学べる専門学校です。ゲーム、CG、映像、IT、Webなど幅広い分野の学科があり、実際の業界を意識した実践的な授業が特徴です。名古屋駅周辺というアクセスの良さも魅力で、多くの学生が専門的な技術や知識を身につけています。"
+        },
+        {
+            title: "イオンモール大高",
+            lat: 35.05320023251612,
+            lng: 136.94725093881632,
+            image: "images/oodaka.jpg",
+            website: "https://www.aeon.jp/sc/odaka/",
+            description: "イオンモール大高は、名古屋市緑区にある大型ショッピングモールです。ファッション、飲食、生活用品、家電など幅広い店舗が集まっており、買い物から食事、映画まで一つの施設で楽しむことができます。JR南大高駅と直結しているためアクセスも良く、地域の人々を中心に幅広い世代が利用しています。"
+        },
+        {
+            title: "ららぽーと名古屋みなとアクルス",
+            lat: 35.10940697819714,
+            lng: 136.88273733881843,
+            image: "images/minato.jpg",
+            website: "https://mitsui-shopping-park.com/lalaport/minatoaquls/",
+            description: "ららぽーと名古屋みなとアクルスは、名古屋市港区にある大型商業施設です。ファッションや雑貨、飲食店、サービスなど多くの店舗が集まり、日常の買い物から休日のお出かけまで幅広く利用できます。館内にはイベントスペースなどもあり、買い物だけでなくさまざまな楽しみ方ができる施設です。"
+        },
+        {
+            title: "ららぽーと安城",
+            lat: 34.96548241504072,
+            lng: 137.08026052468273,
+            image: "images/anzyou.jpg",
+            website: "https://mitsui-shopping-park.com/lalaport/anjo/",
+            description: "ららぽーと安城は、愛知県安城市にある大型商業施設です。さまざまなショップや飲食店、エンターテインメント施設が集まり、幅広い世代が楽しめる場所となっています。買い物だけでなく、食事や家族でのレジャーなど、一日を通して過ごせることが特徴です。"
+        },
+        {
+            title: "ららぽーと愛知東郷",
+            lat: 35.09877397854422,
+            lng: 137.04693269819055,
+            image: "images/tougou.jpg",
+            website: "https://mitsui-shopping-park.com/lalaport/togo/",
+            description: "ららぽーと愛知東郷は、愛知県東郷町にある大型商業施設です。ファッション、雑貨、飲食、サービスなど多くの店舗が集まり、ショッピングだけでなく家族や友人との食事やレジャーにも利用されています。地域の人々が日常的に利用できる施設として、幅広い世代に親しまれています。"
+        },
+        {
+            title: "イオンモール常滑",
+            lat: 34.88301297724748,
+            lng: 136.82633142460304,
+            image: "images/tokoname.jpg",
+            website: "https://tokoname.aeonmall.jp/",
+            description: "イオンモール常滑は、愛知県常滑市のりんくう町にある大型ショッピングモールです。ファッションや雑貨、飲食店などの多彩な店舗に加え、映画館やエンターテインメント施設もあり、買い物だけでなく遊びや食事も楽しめます。中部国際空港（セントレア）に近い立地も特徴で、「海と空を120％楽しむエンターテインメントパーク」をコンセプトに、日常から非日常まで楽しめる施設となっています。"
+        }
+    ];
+
+    function initMap() {
+        map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 10,
+            center: { lat: 35.168120219014064, lng: 136.88551407783842 },
+            zoomControl: true,
+            mapTypeControl: true,
+            streetViewControl: false
+        });
+
+        locations.forEach(function(loc) {
+            const marker = new google.maps.Marker({
+                position: { lat: loc.lat, lng: loc.lng },
+                map: map,
+                title: loc.title
+            });
+
+            // 情報ウィンドウ（クリックで開く）
+            const infoWindow = new google.maps.InfoWindow({
+            content:
+                "<div style='width:100%; max-width:500px; box-sizing:border-box; overflow-x:hidden;'>" +
+                "<h3 style='margin:0 0 8px;'>" + loc.title + "</h3>" +
+                (loc.image ? "<img src='" + loc.image + "' style='width:100%; height:auto; border-radius:4px; display:block;'>" : "") +
+                "<div style='max-height:250px; overflow-y:auto; overflow-x:hidden; margin-top:8px;'>" +
+                "<p style='margin:0; overflow-wrap:anywhere;'>" + loc.description + "</p>" +
+                "</div>" +
+                (loc.website ? "<p style='margin-top:10px;'><a href='" + loc.website + "' target='_blank' rel='noopener noreferrer'>公式サイトを見る</a></p>" : "") +
+                "</div>",
+            maxWidth: 500
+        });
+
+            marker.addListener("click", function() {
+                infoWindow.open(map, marker);
+            });
+
+            markers.push(marker);
+        });
+    }
+
+
+    $("#resetButton").on("click", function() {
+        const bounds = new google.maps.LatLngBounds();
+
+        locations.forEach(function(loc) {
+            bounds.extend({
+                lat: loc.lat,
+                lng: loc.lng
+            });
+        });
+
+        map.fitBounds(bounds);
+    });
+
+    </script>
+</body>
+</html>
